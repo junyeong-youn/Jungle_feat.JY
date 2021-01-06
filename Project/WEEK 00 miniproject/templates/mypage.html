@@ -1,0 +1,75 @@
+{% extends 'layout.html' %}
+
+{% block pageload %}
+{% if session['id'] %}
+<script>
+    $(document).ready(function () {
+        showMySams();
+        showRank();
+        Beloggedin();
+        setKeyword();
+        $('#jangwon').hide();
+                $('#jangwon').hide();
+        $('#jangwonhome').hover(function() {
+            $('#jangwonhome').hide();
+            $('#jangwon').show();
+        }, function() {
+            $('#jangwon').hide();
+            $('#jangwonhome').show();
+        })
+
+        $('#goLogin').hover(function() {
+            $('#chat').show();
+            $('#wannalogin').show();
+        }, function() {
+            $('#chat').hide();
+            $('#wannalogin').hide();
+        })
+
+        $('#goSet').hover(function() {
+            $('#chat').show();
+            $('#wannaSet').show();
+        }, function() {
+            $('#chat').hide();
+            $('#wannaSet').hide();
+        })
+
+
+        $('#justSee').hover(function() {
+            $('#chat').show();
+            $('#wannaSee').show();
+        }, function() {
+            $('#chat').hide();
+            $('#wannaSee').hide();
+        })
+    });
+</script>
+{% else %}
+<script>
+    $(document).ready(function () {
+        window.location.href='/unAuthorized'
+    });
+</script>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div style="height:10em; left:50%; top: 120px; z-index: 1; padding: 2em 0em;">
+    </div>
+<div class="main">
+    <div class="title">
+        <div class="container">
+            <h1 class="title has-text-black has-text-centered" style="font-weight: 300; margin-bottom: 1rem">
+                그대의 詩
+            </h1>
+            <p></p>
+            <h3 class="subtitle has-text-centered" style="color : lightslategrey">
+                글이란 도(道)를 밝히는 그릇이니라.
+            </h3>
+            <div id="my-sam-list" class="column">
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
