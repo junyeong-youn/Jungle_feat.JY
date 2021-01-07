@@ -3,7 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
 
-client = MongoClient('mongodb://test:test@3.35.14.248',27017)
+client = MongoClient('mongodb://~~~~~~~~~~@3.35.14.248',27017)
 
 
 db = client.jangwon
