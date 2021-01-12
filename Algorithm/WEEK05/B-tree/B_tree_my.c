@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <Windows.h>
 
-#define wait_time 2000
 #define M 5
 #define t 3
 typedef struct node
@@ -21,7 +20,7 @@ typedef struct Btree
 void Btree_insert(Btree *T, int k);
 void Btree_split(node *x, int i);
 void Btree_insert_non(node *x, int k);
-void Btree_delete(Btree* T, int k);
+void Btree_delete(node* x, int k);
 void Btree_bind(node *x, int i, int k);
 void Btree_move(node *x, int i);
 int find_predecessor(node *x);
@@ -48,7 +47,9 @@ int main(void)
     Btree_insert(T, 13);
     Btree_insert(T, 11);
     Btree_insert(T, 19);
-    Btree_delete(T, 4);
+    Btree_delete(T->root, 4);
+
+    printf("%d", T->root->key[0]);
     
 
     free(T);
@@ -67,11 +68,11 @@ void Btree_insert(Btree *T, int k)
         s->size = 0;
         s->p_arr[0] = r;
         Btree_split(s, 0);
-        Btree_insert_non(s, k); // node *s
+        Btree_insert_non(s, k);
     }
     else
     {
-        Btree_insert_non(r, k); //
+        Btree_insert_non(r, k);
     }
 }
 
@@ -180,107 +181,106 @@ void Btree_bind(node *x, int i, int k)
     Btree_delete(y, k);
 }
 
-void Btree_delete(Btree* T, int k)
-{   node* x = T->root;
-    if (x->leaf = true)
+void Btree_delete(node* x, int k)
+{
+    if (x->leaf == true)
     {
         for (int i = 0; i <= x->size; i++)
         {
-            if (x->key[i] = k)
+            if (x->key[i] == k)
             {
-                for (int j = i; x->size - 2 <= j; j++)
+                for (int j = i;  j<= x->size - 2; j++)
                 {
                     x->key[i] = x->key[i + 1];
                 }
-                for (int j = i; x->size - 1 <= j; j++)
-                {
-                    x->p_arr[i] = x->p_arr[i + 1];
-                }
                 x->size = x->size - 1;
+                break;
             }
         }
     }
-    int i = 0;
-    while (x->key[i] < k)
-    {
-        i++;
-    }
-    if (x->key[i] = k)
-    {
+    else{
+        int i = 0;
+        while (x->key[i] < k)
+        {
+            i++;
+        }
+        if (x->key[i] == k)
+        {
+            if (x->p_arr[i]->size >= t)
+            {
+                int key_pre;
+                key_pre = find_predecessor(x->p_arr[i]);
+                x->key[i] = key_pre;
+                Btree_delete(x->p_arr[i], key_pre);
+            }
+
+            if (x->p_arr[i + 1]->size >= t)
+            {
+                int key_next;
+                key_next = find_successor(x->p_arr[i + 1]);
+                x->key[i] = key_next;
+                Btree_delete(x->p_arr[i + 1], key_next);
+            }
+            else
+                Btree_bind(x, i, k);
+        }
+
         if (x->p_arr[i]->size >= t)
         {
-            int key_pre;
-            key_pre = find_predecessor(x->p_arr[i]);
-            x->key[i] = key_pre;
-            Btree_delete(x->p_arr[i], key_pre);
-        }
-
-        if (x->p_arr[i + 1]->size >= t)
-        {
-            int key_next;
-            key_next = find_successor(x->p_arr[i + 1]);
-            x->key[i] = key_next;
-            Btree_delete(x->p_arr[i + 1], key_next);
-        }
-        else
-            Btree_bind(x, i, k);
-    }
-
-    if (x->p_arr[i]->size >= t)
-    {
-        Btree_delete(x->p_arr[i], k);
-    }
-    else
-    {
-        if ((x->p_arr[i + 1]->size >= t) && (x->p_arr[i]->size = t - 1))
-        {
-            x->p_arr[i]->key[t - 1] = x->key[i];
-            x->key[i] = x->p_arr[i + 1]->key[0];
-            x->p_arr[i]->p_arr[t] = x->p_arr[i + 1]->p_arr[0];
-
-            x->p_arr[i]->size = x->p_arr[i]->size + 1;
-            x->p_arr[i + 1]->size = x->p_arr[i + 1]->size - 1;
-
-            for (int j = 0; x->p_arr[i + 1]->size - 1; j++)
-            {
-                x->p_arr[i + 1]->key[j] = x->p_arr[i + 1]->key[j + 1];
-            }
-            for (int j = 0; x->p_arr[i + 1]->size; j++)
-            {
-                x->p_arr[i + 1]->p_arr[j] = x->p_arr[i + 1]->p_arr[j + 1];
-            }
-            Btree_delete(x->p_arr[i], k);
-        }
-
-        if (i = x->size && x->p_arr[i - 1] >= t)
-        {
-            //오른쪽 키값 밀기
-            for (int j = x->p_arr[i]->size - 1; j >= 0; j--)
-            {
-                x->p_arr[i]->key[j + 1] = x->p_arr[i]->key[j];
-            }
-            //오른쪽 포인터값 밀기
-            for (int j = x->p_arr[i]->size; j >= 0; j--)
-            {
-                x->p_arr[i]->p_arr[j + 1] = x->p_arr[i]->p_arr[j];
-            }
-            //부모노드에 있는 값을 오른쪽으로 옮긴다
-            x->p_arr[i]->key[0] = x->key[i - 1];
-            //부모노드에 있는 값의 포인터를 왼쪽 끝 값의 포인터로 바꾼다.
-            x->p_arr[i]->p_arr[0] = x->p_arr[i - 1]->p_arr[t - 1];
-            //왼쪽 노드 끝값을 부모노드로 옮긴다.
-            x->key[i - 1] = x->p_arr[i - 1]->key[t - 1];
-            //사이즈 바꾸기
-            x->p_arr[i]->size = x->p_arr[i]->size + 1;
-            x->p_arr[i - 1]->size = x->p_arr[i - 1]->size - 1;
             Btree_delete(x->p_arr[i], k);
         }
         else
-            Btree_bind(x, i, k);
-
-        if (x->size = 0)
         {
-            free(x);
-        }
+            if ((x->p_arr[i + 1]->size >= t) && (x->p_arr[i]->size == t - 1))
+            {
+                x->p_arr[i]->key[t - 1] = x->key[i];
+                x->key[i] = x->p_arr[i + 1]->key[0];
+                x->p_arr[i]->p_arr[t] = x->p_arr[i + 1]->p_arr[0];
+
+                x->p_arr[i]->size = x->p_arr[i]->size + 1;
+                x->p_arr[i + 1]->size = x->p_arr[i + 1]->size - 1;
+
+                for (int j = 0; x->p_arr[i + 1]->size - 1; j++)
+                {
+                    x->p_arr[i + 1]->key[j] = x->p_arr[i + 1]->key[j + 1];
+                }
+                for (int j = 0; x->p_arr[i + 1]->size; j++)
+                {
+                    x->p_arr[i + 1]->p_arr[j] = x->p_arr[i + 1]->p_arr[j + 1];
+                }
+                Btree_delete(x->p_arr[i], k);
+            }
+
+            if (i == x->size && x->p_arr[i - 1] >= t)
+            {
+                //오른쪽 키값 밀기
+                for (int j = x->p_arr[i]->size - 1; j >= 0; j--)
+                {
+                    x->p_arr[i]->key[j + 1] = x->p_arr[i]->key[j];
+                }
+                //오른쪽 포인터값 밀기
+                for (int j = x->p_arr[i]->size; j >= 0; j--)
+                {
+                    x->p_arr[i]->p_arr[j + 1] = x->p_arr[i]->p_arr[j];
+                }
+                //부모노드에 있는 값을 오른쪽으로 옮긴다
+                x->p_arr[i]->key[0] = x->key[i - 1];
+                //부모노드에 있는 값의 포인터를 왼쪽 끝 값의 포인터로 바꾼다.
+                x->p_arr[i]->p_arr[0] = x->p_arr[i - 1]->p_arr[t - 1];
+                //왼쪽 노드 끝값을 부모노드로 옮긴다.
+                x->key[i - 1] = x->p_arr[i - 1]->key[t - 1];
+                //사이즈 바꾸기
+                x->p_arr[i]->size = x->p_arr[i]->size + 1;
+                x->p_arr[i - 1]->size = x->p_arr[i - 1]->size - 1;
+                Btree_delete(x->p_arr[i], k);
+            }
+            else
+                Btree_bind(x, i, k);
+
+            if (x->size == 0)
+            {
+                free(x);
+            }
+        }    
     }
 }
