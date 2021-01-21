@@ -39,12 +39,19 @@ team_t team = {
 #define NEXT_BLKP(bp) ((void *)(bp) + GET_SIZE(HDRP(bp)))
 #define PREV_BLKP(bp) ((void *)(bp)-GET_SIZE(HDRP(bp) - WSIZE))
 
+// &&&&&&&& bp + WSIZE에서 bp가 char *형이 아니면 원하지 않는 결과가 나올 것 같습니다.
+// &&&&&&&& bp에 cast를 명확히 해주면 더 안정적인 코드가 될 것 같습니다.
 #define NEXT_FREE(bp) (*(void **)(bp + WSIZE))
 #define PREV_FREE(bp) (*(void **)(bp))
 
 static char *heap_listp = 0;
 static char *free_listp = 0;
 
+// &&&&&&&& extern은 외부 소스에서 함수를 가져다 쓸 때 사용하는 것 같습니다.
+// &&&&&&&& 이 코드에서는 선언 이후 같은 소스의 하단부에서 정의하므로 굳이
+// &&&&&&&& extern을 쓰지 않아도 될 것 같습니다.
+// &&&&&&&& 그리고 static 함수를 사용하면 외부 소스에서 같은 함수 이름을 사용해도
+// &&&&&&&& 충돌이 생기지 않고 해당 소스에서 정의된 내용을 이용한다고 합니다.
 extern int mm_init(void);
 extern void *mm_malloc(size_t size);
 extern void mm_free(void *ptr);
@@ -57,6 +64,11 @@ void *mm_realloc(void *bp, size_t size);
 
 int mm_init(void)
 {
+    // &&&&&&&& allocated 블럭과 free 블럭의 구조를 생각했을 때
+    // &&&&&&&& allocated 블럭에는 prev_free와 next_free가 존재하지 않으므로
+    // &&&&&&&& allocated 블럭의 최소크기는 8바이트이고 free 블럭의 최소크기는 16바이트입니다
+    // &&&&&&&& 따라서 allocated 블럭인 prologue 블럭은 8바이트면 충분하므로
+    // &&&&&&&& 초기 힙을 16바이트로 초기화한다면 작게나마 메모리를 절약할 수 있을 것 같습니다.
     if ((heap_listp = mem_sbrk(6 * WSIZE)) == (void *)-1)
         return -1;
     PUT(heap_listp, 0);
