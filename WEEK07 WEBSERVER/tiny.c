@@ -135,10 +135,7 @@ void clienterror(int fd, char *cause, char *errnum, char *shortmsg, char *longms
 
     /* Build the HTTP response body */
     sprintf(body, "<html><title>Tiny Error</title>");
-    sprintf(body, "%s<body bgcolor="
-                  "ffffff"
-                  ">\r\n",
-            body);
+    sprintf(body, "%s<body bgcolor=""ffffff"">\r\n", body);
     sprintf(body, "%s%s: %s\r\n", body, errnum, shortmsg);
     sprintf(body, "%s<p>%s: %s\r\n", body, longmsg, cause);
     sprintf(body, "%s<hr><em>The Tiny Web server</em>\r\n", body);
@@ -173,11 +170,11 @@ int parse_uri(char *uri, char *filename, char *cgiargs)
     if (!strstr(uri, "cgi-bin")) /* Static content */
     {
         strcpy(cgiargs, "");   //cgiargs =""
-        printf("cgiargs : %d\n", cgiargs);
+        printf("cgiargs : %s\n", cgiargs);
         strcpy(filename, "."); //filename = "."
-        printf("filename : %d\n", filename);
+        printf("filename : %s\n", filename);
         strcat(filename, uri); //filename = ".uri"
-        printf("filename : %d\n", filename);
+        printf("filename : %\n", filename);
 
         if (uri[strlen(uri) - 1] == '/') //2.2.2.2
             strcat(filename, "home.html");
